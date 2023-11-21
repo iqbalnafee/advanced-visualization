@@ -3,7 +3,7 @@
 const canva = d3.select('.canva');
 
 
-d3.json('../json/json_data.json').then(
+d3.json('../d3.js/json/json_data.json').then(
     d => drawTree(d)
 );
 
