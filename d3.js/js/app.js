@@ -6,38 +6,43 @@ d3.json('../d3.js/json/source_code_data.json').then(
   //d => drawTreeSample(d)
 );
 
-function groupAttributesByFilename(data) {
-  const groupedData = {};
+function groupAttributesByFilename(inputData) {
 
-  data.forEach(item => {
-    const { filename, ...attributes } = item;
-    groupedData[filename] = {
-      filename,
-      children: [attributes.developer]
-    }; 
+  const outputData = {
+    name: "data",
+    children: []
+  };
+  
+  const fileMap = {};
+  
+  inputData.data.forEach(item => {
+    const { filename, developer } = item;
+  
+    if (!fileMap[filename]) {
+      fileMap[filename] = {
+        name: filename,
+        children: []
+      };
+    }
+  
+    fileMap[filename].children.push(...developer.map(dev => ({ name: dev })));
   });
-
-  return  [{
-    children: Object.values(groupedData).map(entry => ({
-      filename: entry.filename,
-      children: entry.children
-    }))
-  }];
-
-  // return {
-  //   data : Object.values(children) 
-  // }
+  
+  Object.values(fileMap).forEach(file => {
+    outputData.children.push(file);
+  });
+  return outputData;
 }
 
 
 function drawTree(treeData) {
-  treeData = groupAttributesByFilename(treeData.data);
+  treeData = groupAttributesByFilename(treeData);
 
   // Displaying the result
   console.log(treeData);
   
   let colors = ["yellow","red","purple","blue","green","orange"];
-  let radius = 10;
+  let radius = 5;
   // set the dimensions and margins of the diagram
   const margin = {top: 20, right: 90, bottom: 30, left: 90},
   width  = 660 - margin.left - margin.right,
@@ -47,7 +52,7 @@ function drawTree(treeData) {
   const treemap = d3.tree().size([height, width]);
 
   //  assigns the data to a hierarchy using parent-child relationships
-  let nodes = d3.hierarchy(treeData[0], d => d.children);
+  let nodes = d3.hierarchy(treeData, d => d.children);
 
   // maps the node data to the tree layout
   nodes = treemap(nodes);
@@ -91,10 +96,10 @@ function drawTree(treeData) {
   // adds the text to the node
   node.append("text")
   .attr("dy", ".35em")
-  .attr("x", d => d.children ? (radius + 5) * -1 : radius + 5)
-  .attr("y", d => d.children && d.depth !== 0 ? -(radius + 5) : d)
+  .attr("x", d => d.children ? (radius + 15) * -1 : radius + 15)
+  .attr("y", d => d.children && d.depth !== 0 ? -(radius + 15) : d)
   .style("text-anchor", d => d.children ? "end" : "start")
-  .text(d => d.data.filename);
+  .text(d => d.data.name);
 }
 
 function drawTreeSample(treeData) {
@@ -156,8 +161,8 @@ function drawTreeSample(treeData) {
   // adds the text to the node
   node.append("text")
   .attr("dy", ".35em")
-  .attr("x", d => d.children ? (radius + 5) * -1 : radius + 5)
-  .attr("y", d => d.children && d.depth !== 0 ? -(radius + 5) : d)
+  .attr("x", d => d.children ? (radius + 15) * -1 : radius + 15)
+  .attr("y", d => d.children && d.depth !== 0 ? -(radius + 15) : d)
   .style("text-anchor", d => d.children ? "end" : "start")
   .text(d => d.data.name);
 }
