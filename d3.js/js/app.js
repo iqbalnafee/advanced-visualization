@@ -1,11 +1,89 @@
 
 
 const canva = d3.select('.canva');
+nestedTree([]);
 
 
-d3.json('../d3.js/json/json_data.json').then(
-    d => drawTree(d)
-);
+// d3.json('../d3.js/json/source_code_data.json').then(
+//     d => nestedTree(d.data)
+// );
+
+function nestedTree(datum){
+
+  let sampleData = [
+    {site:"Good Marketing Club",
+      category:"Visualization",
+      essay:"HOW INCLUSIVE ARE MAKEUP BRANDS?",
+      link:"https://www.goodmarketing.club/visualization/how-inclusive-are-makeup-brands"
+      },
+      {site:"Good Marketing Club",
+      category:"Visualization",
+      essay:"fgf1",
+      link:"ghg2"
+      },
+      {site:"aa",
+      category:"bb",
+      essay:"cc",
+      link:"ff"
+      },
+      {site:"aa",
+      category:"bb",
+      essay:"gggg",
+      link:"ffkkk"
+      }
+  ];
+
+  let nestedData = d3.nest()
+  .key(d => d.site)
+  .key(d => d.category)
+  .entries(sampleData);
+
+
+  //const nestedData = d3.groups(datum, d => d.filename); 
+  let treeData = d3.hierarchy(nestedData[0], d => d.values);
+  console.log(treeData);
+  let treeLayout = d3.tree().size([600,500]);
+  treeLayout(treeData);
+  let parentsNumber = 10;
+  let treeNodes = d3.select("svg g.nodes");
+
+  //parent nodes as circle
+  treeNodes.selectAll("circle")
+           .data(treeData.descendants())
+           .enter()
+           .append("circle")
+           .attr("class","circle")
+           .attr("transform", d => `translate(${d.y},${d.x})`)
+           .attr("r",8)
+           .attr("fill","red");
+
+  //children nodes as rectangle
+  // treeNodes.selectAll("rect")
+  //           .data(treeData.descendants().slice(0, parentsNumber))
+  //           .enter()
+  //           .append("rect")
+  //           .attr("class","rect")
+  //           .attr("transform", d => `translate(${d.y},${d.x})`)
+  //           .attr("width",d => ((d.data.essay + " ").length+4)*9)
+  //           .attr("height",25)
+  //           .attr("y",-25/2);
+
+  //links between nodes
+  treeNodes.select(".links")
+            .selectAll("line")
+            .data(treeData.links())
+            .enter()
+            .append("path")
+            .classed("link",true)
+            .attr("d", function(d) { 
+              return "M" + d.target.y + "," + d.target.x
+                    + "C" + (d.source.y + 100) + "," + d.target.x
+                    + " " + (d.source.y + 100) + "," + d.source.x
+                    + " " + d.source.y + "," + d.source.x
+            });
+            
+  
+}
 
 function drawTree(data){
     const width = 928;

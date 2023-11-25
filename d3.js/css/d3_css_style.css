@@ -6,8 +6,12 @@
   }
   
   .link {
-    stroke: #999;
-    stroke-opacity: .6;
+    stroke: #fff;
+    stroke-width: 1px;
+    fill: none;
+  }
+  .rect {
+    fill:rgb(131, 192, 224)
   }
   
   h3 {
