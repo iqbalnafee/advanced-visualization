@@ -1,156 +1,70 @@
 
 
-const canva = d3.select('.canva');
-nestedTree([]);
+d3.json('../d3.js/json/json_data.json').then(
+  d => drawTree(d)
+);
+
+function drawTree(treeData) {
 
 
-// d3.json('../d3.js/json/source_code_data.json').then(
-//     d => nestedTree(d.data)
-// );
+  let colors = ["yellow","red","purple","blue","green","orange"];
+  let radius = 10;
+  // set the dimensions and margins of the diagram
+  const margin = {top: 20, right: 90, bottom: 30, left: 90},
+  width  = 660 - margin.left - margin.right,
+  height = 500 - margin.top - margin.bottom;
 
-function nestedTree(datum){
+  // declares a tree layout and assigns the size
+  const treemap = d3.tree().size([height, width]);
 
-  let sampleData = [
-    {site:"Good Marketing Club",
-      category:"Visualization",
-      essay:"HOW INCLUSIVE ARE MAKEUP BRANDS?",
-      link:"https://www.goodmarketing.club/visualization/how-inclusive-are-makeup-brands"
-      },
-      {site:"Good Marketing Club",
-      category:"Visualization",
-      essay:"fgf1",
-      link:"ghg2"
-      },
-      {site:"aa",
-      category:"bb",
-      essay:"cc",
-      link:"ff"
-      },
-      {site:"aa",
-      category:"bb",
-      essay:"gggg",
-      link:"ffkkk"
-      }
-  ];
+  //  assigns the data to a hierarchy using parent-child relationships
+  let nodes = d3.hierarchy(treeData, d => d.children);
 
-  let nestedData = d3.nest()
-  .key(d => d.site)
-  .key(d => d.category)
-  .entries(sampleData);
+  // maps the node data to the tree layout
+  nodes = treemap(nodes);
 
+  // append the svg object to the body of the page
+  // appends a 'group' element to 'svg'
+  // moves the 'group' element to the top left margin
+  const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom),
+  g = svg.append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
 
-  //const nestedData = d3.groups(datum, d => d.filename); 
-  let treeData = d3.hierarchy(nestedData[0], d => d.values);
-  console.log(treeData);
-  let treeLayout = d3.tree().size([600,500]);
-  treeLayout(treeData);
-  let parentsNumber = 10;
-  let treeNodes = d3.select("svg g.nodes");
+  // adds the links between the nodes
+  const link = g.selectAll(".link")
+  .data( nodes.descendants().slice(1))
+  .enter().append("path")
+  .attr("class", "link")
+  .style("stroke", (d,i) => colors[i%colors.length])
+  .attr("d", d => {
+  return "M" + d.y + "," + d.x
+    + "C" + (d.y + d.parent.y) / 2 + "," + d.x
+    + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
+    + " " + d.parent.y + "," + d.parent.x;
+  });
 
-  //parent nodes as circle
-  treeNodes.selectAll("circle")
-           .data(treeData.descendants())
-           .enter()
-           .append("circle")
-           .attr("class","circle")
-           .attr("transform", d => `translate(${d.y},${d.x})`)
-           .attr("r",8)
-           .attr("fill","red");
+  // adds each node as a group
+  const node = g.selectAll(".node")
+  .data(nodes.descendants())
+  .enter().append("g")
+  .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+  .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
 
-  //children nodes as rectangle
-  // treeNodes.selectAll("rect")
-  //           .data(treeData.descendants().slice(0, parentsNumber))
-  //           .enter()
-  //           .append("rect")
-  //           .attr("class","rect")
-  //           .attr("transform", d => `translate(${d.y},${d.x})`)
-  //           .attr("width",d => ((d.data.essay + " ").length+4)*9)
-  //           .attr("height",25)
-  //           .attr("y",-25/2);
+  // adds the circle to the node
+  node.append("circle")
+  .attr("r", radius)
+  .style("stroke", (d,i) => colors[i%colors.length])
+  .style("fill", (d,i) => colors[i%colors.length]);
 
-  //links between nodes
-  treeNodes.select(".links")
-            .selectAll("line")
-            .data(treeData.links())
-            .enter()
-            .append("path")
-            .classed("link",true)
-            .attr("d", function(d) { 
-              return "M" + d.target.y + "," + d.target.x
-                    + "C" + (d.source.y + 100) + "," + d.target.x
-                    + " " + (d.source.y + 100) + "," + d.source.x
-                    + " " + d.source.y + "," + d.source.x
-            });
-            
-  
+  // adds the text to the node
+  node.append("text")
+  .attr("dy", ".35em")
+  .attr("x", d => d.children ? (radius + 5) * -1 : radius + 5)
+  .attr("y", d => d.children && d.depth !== 0 ? -(radius + 5) : d)
+  .style("text-anchor", d => d.children ? "end" : "start")
+  .text(d => d.data.name);
 }
-
-function drawTree(data){
-    const width = 928;
-
-    // Compute the tree height; this approach will allow the height of the
-    // SVG to scale according to the breadth (width) of the tree layout.
-    const root = d3.hierarchy(data);
-    const dx = 10;
-    const dy = width / (root.height + 1);
-  
-    // Create a tree layout.
-    const tree = d3.tree().nodeSize([dx, dy]);
-  
-    // Sort the tree and apply the layout.
-    root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
-    tree(root);
-  
-    // Compute the extent of the tree. Note that x and y are swapped here
-    // because in the tree layout, x is the breadth, but when displayed, the
-    // tree extends right rather than down.
-    let x0 = Infinity;
-    let x1 = -x0;
-    root.each(d => {
-      if (d.x > x1) x1 = d.x;
-      if (d.x < x0) x0 = d.x;
-    });
-  
-    // Compute the adjusted height of the tree.
-    const height = x1 - x0 + dx * 2;
-  
     
-  
-    const svg = canva.append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [-dy / 3, x0 - dx, width, height])
-        .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
-  
-    const link = svg.append("g")
-        .attr("fill", "none")
-        .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.4)
-        .attr("stroke-width", 1.5)
-      .selectAll()
-        .data(root.links())
-        .join("path")
-          .attr("d", d3.linkHorizontal()
-              .x(d => d.y)
-              .y(d => d.x));
-    
-    const node = svg.append("g")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-width", 3)
-      .selectAll()
-      .data(root.descendants())
-      .join("g")
-        .attr("transform", d => `translate(${d.y},${d.x})`);
-  
-    node.append("circle")
-        .attr("fill", d => d.children ? "#555" : "#999")
-        .attr("r", 2.5);
-  
-    node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.children ? -6 : 6)
-        .attr("text-anchor", d => d.children ? "end" : "start")
-        .text(d => d.data.name)
-      .clone(true).lower()
-        .attr("stroke", "white");
-}

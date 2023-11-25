@@ -1,23 +1,17 @@
-.node text {
-    font-size: 10px;
-    font-family: "Helvetica";
-    stroke: none;
-    fill: grey;
-  }
-  
-  .link {
-    stroke: #fff;
-    stroke-width: 1px;
-    fill: none;
-  }
-  .rect {
-    fill:rgb(131, 192, 224)
-  }
-  
-  h3 {
-    color: #1ABC9C;
-    text-align: center;
-    font-style: italic;
-    font-size: 14px;
-    font-family: "Helvetica";
-  }
+body {
+  background-color: #eee;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
+
+.node text { font: 16px sans-serif; }
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
