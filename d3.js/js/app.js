@@ -3,8 +3,8 @@ const radius = 5;
 
 d3.json('../d3.js/json/source_code_data.json').then(
 //d3.json('../d3.js/json/json_data.json').then(
-  ///d => drawHorizontalTree(d)
-  d => drawVerticalTree(d)
+  d => drawHorizontalTree(d)
+  //d => drawVerticalTree(d)
 );
 
 function groupAttributesByFilename(inputData) {
@@ -72,9 +72,12 @@ function drawHorizontalTree(treeData) {
   const svg = d3.select("body").append("svg")
     .attr("width", 1200)
     .attr("height", 1200);
+
   g = svg.append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
+
+       
 
   // adds the links between the nodes
   const link = g.selectAll(".link")
@@ -87,7 +90,14 @@ function drawHorizontalTree(treeData) {
     + "C" + (d.y + d.parent.y) / 2 + "," + d.x
     + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
     + " " + d.parent.y + "," + d.parent.x;
-  });
+  })
+  .style("opacity", 0) // Set initial opacity to 0 for the animation
+  .style("stroke-width", 0) // Set initial stroke width to 0 for the animation
+  .transition() // Apply the transition
+  .delay(d => 500 + 1800 * d.depth)
+  .duration(800) // Set the duration of the animation in milliseconds
+  .style("opacity", 1) // Transition to full opacity
+  .style("stroke-width", 2); // Transition to desired stroke width
 
   // adds each node as a group
   const node = g.selectAll(".node")
@@ -100,7 +110,14 @@ function drawHorizontalTree(treeData) {
   node.append("circle")
   .attr("r", radius)
   .style("stroke", (d,i) => colors[i%colors.length])
-  .style("fill", (d,i) => colors[i%colors.length]);
+  .style("fill", (d,i) => colors[i%colors.length])
+  .style("opacity", 0) // Set initial opacity to 0 for the animation
+  .style("stroke-width", 0) // Set initial stroke width to 0 for the animation
+  .transition() // Apply the transition
+  .delay(d => 500 + 1800 * d.depth)
+  .duration(800) // Set the duration of the animation in milliseconds
+  .style("opacity", 1) // Transition to full opacity
+  .style("stroke-width", 2); // Transition to desired stroke width
 
   // adds the text to the node
   node.append("text")
@@ -108,7 +125,14 @@ function drawHorizontalTree(treeData) {
   .attr("x", d => d.children ? (radius + 15) * -1 : radius + 15)
   .attr("y", d => d.children && d.depth !== 0 ? -(radius + 15) : d)
   .style("text-anchor", d => d.children ? "end" : "start")
-  .text(d => d.data.name);
+  .text(d => d.data.name)
+  .style("opacity", 0) // Set initial opacity to 0 for the animation
+  .style("stroke-width", 0) // Set initial stroke width to 0 for the animation
+  .transition() // Apply the transition
+  .delay(d => 500 + 1800 * d.depth)
+  .duration(800) // Set the duration of the animation in milliseconds
+  .style("opacity", 1) // Transition to full opacity
+  .style("stroke-width", 2); // Transition to desired stroke width
 }
 
 function drawVerticalTree(data){
@@ -137,7 +161,7 @@ function drawVerticalTree(data){
     .attr("transform", `translate(${margin}, ${margin})`);
 
   const link = d3
-    .linkVertical()
+  .linkVertical()
     .x(d => d.x)
     .y(d => d.y);
 
