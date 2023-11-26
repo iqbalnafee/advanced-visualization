@@ -1,5 +1,7 @@
 body {
-  background-color: #eee;
+  background-color: #d4c5e3;
+  display: flex;
+  justify-content: center;
 }
 
 .node circle {
@@ -8,10 +10,13 @@ body {
   stroke-width: 3px;
 }
 
-.node text { font: 16px sans-serif; }
+.node text { 
+  font: 20px Monospace;
+  font-weight: bold; 
+}
 
 .link {
   fill: none;
   stroke: #ccc;
-  stroke-width: 2px;
+  stroke-width: 3px;
 }

@@ -48,8 +48,8 @@ function drawTree(treeData) {
   let radius = 5;
   // set the dimensions and margins of the diagram
   const margin = {top: 20, right: 90, bottom: 30, left: 90},
-  width  = 700 - margin.left - margin.right,
-  height = 700 - margin.top - margin.bottom;
+  width  = 900 - margin.left - margin.right,
+  height = 900 - margin.top - margin.bottom;
 
   // declares a tree layout and assigns the size
   const treemap = d3.tree().size([height, width]);
