@@ -1,5 +1,6 @@
 body {
-  background-color: #d4c5e3;
+  /* background-color: #d4c5e3; */
+  background-color: #fff;
   display: flex;
   justify-content: center;
 }

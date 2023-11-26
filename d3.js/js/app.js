@@ -1,7 +1,10 @@
-
+const colors = ["yellow","red","purple","blue","green","orange"];
+const radius = 5;
 
 d3.json('../d3.js/json/source_code_data.json').then(
-  d => drawTree(d)
+//d3.json('../d3.js/json/json_data.json').then(
+  ///d => drawHorizontalTree(d)
+  d => drawVerticalTree(d)
 );
 
 function groupAttributesByFilename(inputData) {
@@ -14,14 +17,20 @@ function groupAttributesByFilename(inputData) {
   const fileMap = {};
   
   inputData.data.forEach(item => {
+
+    devData = [];
     const { filename, developer, lastedit, lines } = item;
-    let developers = "Developers: "+developer.join(', ');
+    console.log(developer);
+    developer.forEach((dev) => {
+      devData.push({name:dev});
+    });
+
     let lines_of_code = "Lines: "+lines.length;
     let last_edit = "Last Edit: "+lastedit;
     fileMap[filename] = {
       name: filename , 
       children: [
-        { name: developers },
+        { children: devData },
         { name: lines_of_code},
         { name: last_edit }
       ]
@@ -37,17 +46,14 @@ function groupAttributesByFilename(inputData) {
 }
 
 
-function drawTree(treeData) {
+function drawHorizontalTree(treeData) {
   treeData = groupAttributesByFilename(treeData);
 
   // Displaying the result
   console.log(treeData);
-  
-  let colors = ["yellow","red","purple","blue","green","orange"];
-  //let colors = ["red","blue","green"];
-  let radius = 5;
+
   // set the dimensions and margins of the diagram
-  const margin = {top: 20, right: 90, bottom: 30, left: 90},
+  const margin = {top: 20, right: 90, bottom: 30, left: 90};
   width  = 900 - margin.left - margin.right,
   height = 900 - margin.top - margin.bottom;
 
@@ -65,7 +71,7 @@ function drawTree(treeData) {
   // moves the 'group' element to the top left margin
   const svg = d3.select("body").append("svg")
     .attr("width", 1200)
-    .attr("height", 1200),
+    .attr("height", 1200);
   g = svg.append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
@@ -103,6 +109,92 @@ function drawTree(treeData) {
   .attr("y", d => d.children && d.depth !== 0 ? -(radius + 15) : d)
   .style("text-anchor", d => d.children ? "end" : "start")
   .text(d => d.data.name);
+}
+
+function drawVerticalTree(data){
+
+  data = groupAttributesByFilename(data);
+  console.log(data);
+  const { innerWidth, innerHeight } = window;
+  const w = innerWidth * 0.9;
+  const h = innerHeight * 0.9;
+  const svg = d3.select("body").append("svg")
+  .attr("height", h)
+  .attr("width", w);
+
+
+  const margin = 40;
+  const width = w - 2 * margin;
+  const height = h - 2 * margin;
+
+
+  const tree = d3.tree().size([width , height]);
+
+  const root = tree(d3.hierarchy(data));
+
+  const g = svg
+    .append("g")
+    .attr("transform", `translate(${margin}, ${margin})`);
+
+  const link = d3
+    .linkVertical()
+    .x(d => d.x)
+    .y(d => d.y);
+
+  g.selectAll("path")
+    .data(root.links())
+    .enter()
+    .append("path")
+    .attr("d", d => {
+      return link({ source: d.source, target: d.source });
+    })
+    .style("fill", "none")
+    .style("stroke", (d,i) => colors[i%colors.length])
+    .transition()
+    .attr("d", d => {
+      return link(d);
+    })
+    .delay(d => {
+      return 500 + 2000 * d.source.depth;
+    })
+    .duration(2000);
+
+  g.selectAll("circle")
+    .data(root.descendants())
+    .enter()
+    .append("circle")
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+    .attr("r", d => {
+      return 10 + 3 * d.height;
+    })
+    .attr("fill", "transparent")
+    .transition()
+    .attr("fill", (d,i) => colors[i%colors.length])
+    .delay(d => {
+      return 500 + 2000 * d.depth;
+    })
+    .duration(2000);
+
+
+    g.selectAll("text")
+      .data(root.descendants())
+      .enter()
+      .append("text")
+      .attr("x", d => d.x - 20)
+      .attr("y", d => d.y + 20)
+      .text(d => d.data.name)
+      .attr("font-family", "Monospace")
+      .attr("font-weight", "bold")
+      .attr("font-size", "20px")
+      .attr("fill", "transparent")
+      .transition()
+      .attr("fill", "#000")
+      .delay(d => {
+        return 500 + 2000 * d.depth;
+      })
+      .duration(2000);
+
 }
 
 
